@@ -108,6 +108,15 @@ def show_view(request, assignment_id):
                 )
             else:
                 student_list = course.students.all().order_by("last_name", "first_name")
+        elif period == "all":
+            active_period = "all"
+            student_list = course.students.all().order_by("last_name", "first_name")
+        elif period == "none":
+            active_period = "none"
+            student_list = []
+        elif period == "teachers":
+            active_period = "teachers"
+            student_list = course.teacher.all().order_by("last_name", "first_name")
         elif course.period_set.exists():
             if period == "":
                 if request.user in course.teacher.all():
@@ -120,10 +129,7 @@ def show_view(request, assignment_id):
                 else:
                     period = "none"
 
-            if period == "all":
-                active_period = "all"
-                student_list = course.students.all().order_by("last_name", "first_name")
-            elif period == "none":
+            if period == "none":
                 active_period = "none"
                 student_list = []
             else:
@@ -131,9 +137,6 @@ def show_view(request, assignment_id):
                     Period.objects.filter(course=course), id=int(period)
                 )
                 student_list = active_period.students.all().order_by("last_name", "first_name")
-        elif period == "all":
-            active_period = "all"
-            student_list = course.students.all().order_by("last_name", "first_name")
         else:
             active_period = "none"
             student_list = []
@@ -372,7 +375,7 @@ def download_grader_view(request, assignment_id):
 
     with grader_file.open() as f_obj:
         response = http.HttpResponse(f_obj.read(), content_type="text/plain")
-    filename = f'{assignment.name.replace(" ", "_")}_{grader_file.name.split("/")[-1]}'
+    filename = f"{assignment.name.replace(' ', '_')}_{grader_file.name.split('/')[-1]}"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
     return response

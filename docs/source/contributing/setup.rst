@@ -3,13 +3,8 @@
 Setting up a development environment
 ------------------------------------
 
-First, you will need to install the following:
-
-* ``python``
-* ``pipenv``
-* ``git``
-
-You will also need a Github account.
+To begin with, you will need to have `git <https://git-scm.com/>`_ installed on your computer.
+You will also need a GitHub account.
 
 First, `fork <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo#forking-a-repository>`_
 tin. Then you can clone tin onto your computer with
@@ -18,46 +13,69 @@ tin. Then you can clone tin onto your computer with
 
    git clone https://github.com/YOUR_GITHUB_USERNAME/tin
 
+From here, you can either use a local setup, or use Docker. Check out the
+relevant sections.
 
-After that, install dependencies and follow standard django procedures
+Docker
+~~~~~~
+If you prefer, you can run the development setup with `Docker <https://www.docker.com/>`_. To do so,
+``cd`` into the project directory and run::
+
+.. code-block:: bash
+
+    docker compose build
+    docker compose up
+
+To create testing users and apply migrations, run the below command in a separate terminal::
+
+.. code-block:: bash
+
+    ./scripts/docker_setup.sh
+
+Local Setup
+~~~~~~~~~~~
+
+To set up your environment locally, you will need to install the following:
+
+* `python <https://www.python.org/downloads/>`_ (3.11)
+* `pipenv <https://pipenv.pypa.io/en/latest/installation.html>`_
+
+Then, run these commands::
+
+.. code-block:: bash
+
+   pipenv install --dev
+   pipenv run python3 manage.py migrate
+   pipenv run python3 manage.py create_debug_users
 
 .. note::
 
     If you're on windows and get errors about ``python3`` not existing,
     try using ``python`` instead of ``python3``.
 
-
-.. code-block:: bash
-
-   pipenv install --dev
-   python3 manage.py migrate
-   python3 create_debug_users.py
-
-
 Now you're all set! Try running the development server
 
 .. code-block:: bash
 
-   python3 manage.py runserver
+   pipenv run python3 manage.py runserver
 
 Head on over to `http://127.0.0.1:8000 <http://127.0.0.1:8000>`_, and login
 as ``admin`` and the password you just entered.
 
+In order to actually submit code, there are some more steps. First,
+you'll need to install `redis <https://redis.io/download>`_.
+
+You'll also need to start the celery worker. This can be done
+by running the following command in a separate terminal::
+
+  pipenv run celery -A tin worker --loglevel=info
 
 
-NixOS Setup
------------
-A ``flake.nix`` file is provided for NixOS users. To use it, first enable the redis service globally.
-Place the following in your ``/etc/nixos/configuration.nix``::
+Final Steps
+~~~~~~~~~~~
+After that, you'll want to create a course and an assignment in the course.
+After saving the assignment, you can hit "Upload grader" to add a grader -
+the simplest example of a grader is located in ``scripts/sample_grader.py``.
 
-  services.redis.server."".enable = true
-
-This will start a systemd service called ``redis``. After that, you can start the flake with::
-
-  nix develop
-
-You can then install dependencies, setup the database, and run the development server as described above.
-
-.. tip::
-
-   You may also need to set ``nix.settings.experimental-features = ["nix-command" "flakes"];`` in your ``configuration.nix``.
+Now you can try making a submission, and as long as your submission doesn't throw an error you
+should get a 100%! Congrats on your brand new 5.0 GPA!
